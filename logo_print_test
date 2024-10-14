@@ -1,0 +1,23 @@
+import time
+print("\nplease wait system processing...")
+
+# Time wait
+time.sleep(1)
+
+# Loading bar simulation
+time.sleep(1)
+loading_steps = [
+    "         🟧🟧🟧🟧🟧🟧🟧",
+    "       🟧🟧🟧🟧🟧🟧🟧🟧🟧",
+    "     🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧",
+    "       🟥🟥🟥🟥🟥🟥🟥🟥🟥",
+    "     🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨",
+    "     🟫🟫🟨🟨🟨🟫🟫🟫🟫🟫🟫",
+    "   🟩🟩🟩🟩🟨🟩🟩🟩🟩🟩🟩🟩🟩",
+    "    🟧🟧🟩🟩🟧🟧🟧🟩🟩🟧🟧",
+    "      🟧🟧🟧🟧🟧🟧🟧🟧🟧"
+
+]
+for step in loading_steps:
+    print(step)
+    time.sleep(1)
