@@ -1,0 +1,31 @@
+def review_section():
+    print("\n--------- Review of Burger Haven ---------\n")
+
+    # Ask for rating
+    print("Please rate your overall experience at Burger Haven (1-5 stars)")
+    rating = input("Enter your rating: ")
+
+    # Validate rating
+    while not rating.isdigit() or int(rating) < 1 or int(rating) > 5:
+        print("Invalid rating. Please enter a number between 1 and 5 stars.")
+        rating = input("Enter your rating: ")
+
+    # Convert rating to integer
+    rating = int(rating)
+
+    # Ask for comments
+    print("\nWould you like to leave any comments about your experience?")
+    comments = input("Enter your comments (or press Enter to skip): ")
+
+    # Display review summary
+    print("\nThank you for your review!")
+    print(f"You rated Burger Haven {rating}/5 stars. 🍔🎉")
+
+    if comments:
+        print(f"Comments: {comments}")
+    else:
+        print("No comments left.")
+
+# Example of how to call the review section
+if __name__ == "__main__":
+    review_section()
