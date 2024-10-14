@@ -1,0 +1,13 @@
+def cash_credit(question):
+    valid_responses = {"c": "cash", "cr": "credit"}
+    while True:
+        response = input(question).lower()
+        if response in valid_responses:
+            return valid_responses[response]
+        elif response in ["cash", "credit"]:
+            return response
+        print("Please choose a valid payment method: 'c' or 'cash' for cash, 'cr' or 'credit' for credit.")
+
+payment_method = cash_credit("\nChoose payment method (c for cash, cr for credit):")
+
+print("Payment Method:", payment_method.capitalize())
