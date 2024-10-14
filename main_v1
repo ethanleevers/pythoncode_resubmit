@@ -1,0 +1,311 @@
+import pandas as pd
+
+
+def int_checker(question, low, high):
+   """
+      Prompt the user for an integer input between 'low' and 'high'.
+      If the input is invalid, keep prompting until a valid input is provided.
+      """
+   while True:
+       error = f"Enter a number between {low} and {high} or 'd' for done."
+
+
+       to_check = input(question).lower()
+       if to_check in ["d", "done"]:
+           return "d"
+       try:
+           user_response = int(to_check)
+
+
+           if low <= user_response <= high:
+               return user_response
+
+
+           else:
+               print(error)
+
+
+       except ValueError:
+           print(error)
+
+
+
+
+def string_checker(question, valid_ans):
+   """
+      Prompt the user for a string input and check if it matches one of the valid answers.
+      Allows for shortcuts (first letter) to be used for valid responses.
+      """
+   shortcuts = {k[0]: k for k in valid_ans}
+   while True:
+
+
+       user_response = input(question).strip().lower()
+
+
+       if user_response in shortcuts:
+           return shortcuts[user_response]
+       elif user_response in valid_ans:
+           return user_response
+       print(f"Enter a valid response from {valid_ans}")
+
+
+
+
+def cash_credit(question):
+
+
+   valid_responses = {"c": "cash", "cr": "credit"}
+   while True:
+       response = input(question).lower()
+       if response in valid_responses:
+           return valid_responses[response]
+       elif response in ["cash", "credit"]:
+           return response
+       print("Please choose a valid payment method: 'c' or 'cash' for cash, 'cr' or 'credit' for credit.")
+
+
+
+
+"""Shows history"""
+
+
+def history():
+
+
+   print('''
+     Welcome to the home of gourmet burgers! Since 1990, our family-owned Whanau Burger has been serving up
+     delicious, handcrafted burgers with fresh ingredients. Founded by burger enthusiasts Luca and Sofia Di Napoli,
+     Whanau Burger brings a unique blend of traditional and contemporary flavors to your plate.
+ ''')
+
+
+
+
+"""Display the menu with gourmet toppings and regular burger options."""
+def display_menu():
+
+
+   gourmet_toppings_data = {
+       "Item": [
+           "13: Premium Bacon", "14: Fried Egg", "15: Avocado", "16: Blue Cheese", "17: Grilled Mushrooms"
+       ],
+       "Cost": [
+           "2.50", "1.50", "2.00", "2.00", "1.50"
+       ]
+   }
+
+
+   regular_menu_data = {
+       "Item": [
+           "1: Lettuce", "2: Tomato", "3: Pickles", "4: Onion", "5: American Cheese", "6: Cheddar Cheese", "7: Swiss Cheese",
+           "8: BBQ Sauce", "9: Ketchup", "10: Mustard", "11: Mayo", "12: Grilled Onion"
+       ],
+       "Cost": [
+           "Free", "Free", "Free", "Free", "1.00", "1.00", "1.50", "0.50", "0.50", "0.50", "0.50", "1.00"
+       ]
+   }
+
+
+   df_gourmet_toppings = pd.DataFrame(gourmet_toppings_data)
+   df_regular_menu = pd.DataFrame(regular_menu_data)
+
+
+   print("<--------------- Menu --------------->")
+   print("Gourmet Toppings:")
+   print(df_gourmet_toppings.to_string(index=False, formatters={'Item': '{:<30}'.format, 'Cost': '${:>5}'.format}))
+   print("Burger Toppings:")
+   print(df_regular_menu.to_string(index=False, formatters={'Item': '{:<30}'.format, 'Cost': '${:>5}'.format}))
+   print("\n Small | Medium | Large |")
+   print("   $5   |   $7  |  $9  |")
+   print(" ------|--------|-------|")
+   print(
+       "Note: Lettuce, Tomato, and Pickles are free. Other toppings come with additional cost.\n"
+       "Note: Please only enter one topping at a time\n")
+
+
+
+
+"""  Get the size of the burger and its associated cost """
+def get_size_cost(size_option, size_prices):
+
+
+   size = string_checker("Choose a burger size (s/m/l or small/medium/large): ", size_option)
+   return size, size_prices[size]
+
+
+
+
+""" Get the toppings chosen by the user and calculate the total cost. """
+def get_toppings(toppings_menu):
+
+
+   toppings = []
+   total_topping_cost = 0.0
+
+
+   while True:
+       topping = int_checker("Choose a topping (1-17) or type 'd' for done: ", 1, 17)
+       if topping == 'd':
+           break
+
+
+       toppings.append(topping)
+       topping_cost = toppings_menu[topping]['cost']
+       total_topping_cost += topping_cost
+       print(f"{toppings_menu[topping]['name']} added. Total topping cost: ${total_topping_cost:.2f}")
+
+
+   return toppings, total_topping_cost
+
+
+
+
+"""Process an order for a single burger including size and toppings."""
+def order_one_burger(burger_number, size_option, size_prices, toppings_menu):
+
+
+   display_menu()
+   print(f"\nOrdering burger {burger_number}...")
+   size, size_cost = get_size_cost(size_option, size_prices)
+   toppings, topping_cost = get_toppings(toppings_menu)
+   total_cost = size_cost + topping_cost
+   return size, size_cost, toppings, total_cost
+
+
+
+
+"""  Process orders for multiple burgers and calculate the total cost."""
+def order_multiple_burgers(size_option, size_prices, toppings_menu):
+
+
+   total_cost = 0
+   burger_details = []
+   burger_number = 1
+
+
+   while True:
+       size, size_cost, toppings, burger_total_cost = order_one_burger(burger_number, size_option, size_prices,
+                                                                       toppings_menu)
+
+
+       burger_summary = f"Burger {burger_number} - Size: {size.capitalize()} (${size_cost})"
+       if toppings:
+           burger_summary += "\n  Toppings:"
+           for topping in toppings:
+               burger_summary += f"\n  - {toppings_menu[topping]['name']}: ${toppings_menu[topping]['cost']}"
+
+
+       burger_summary += f"\n  Total for this burger: ${burger_total_cost:.2f}"
+       print(burger_summary)
+       burger_details.append(burger_summary)
+       total_cost += burger_total_cost
+
+
+       order_more = string_checker("Order another burger? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+       if order_more in ["n", "no"]:
+           break
+
+
+       burger_number += 1
+
+
+   return burger_details, total_cost
+
+
+
+
+"""   Prompt the user for a non-blank input. """
+def not_blank(question):
+
+
+   error = "Enter a name."
+   while True:
+
+
+       user_name = input(question)
+       if user_name.strip() != '':
+           return user_name
+       else:
+           print(error)
+
+
+
+
+"""  Main function to handle the burger ordering process."""
+def order_burger():
+
+
+   print("<--- Welcome to Whanau Burger --->")
+   print("In this order system, you will create a custom burger. 🍔")
+
+
+   want_history = string_checker(
+       "\nLearn about the history of Whanau Burger? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+   if want_history in ["y", "yes"]:
+       history()
+
+
+   want_order = (string_checker
+                ("Order delivery or pick up? (d/p or delivery/pick up): ", ["d", "p", "delivery", "pick up"]))
+   if want_order in ["d", "delivery"]:
+       print("\n$10 surcharge for delivery.")
+       user_name = not_blank("Enter your name: ")
+       address = not_blank("Enter your address: ")
+   else:
+       print("Our address is:\n565 Maunganui Road, Mount Maunganui 3116.")
+   print("See you soon!\n")
+
+
+   want_instructions = string_checker("Read the instructions? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+   if want_instructions in ["y", "yes"]:
+       print("\nYou will see a menu with options for burger toppings and gourmet toppings."
+             "\nSelect toppings by entering the corresponding number. Type 'd' when finished.\n")
+   else:
+       print("No instructions will be displayed.\n")
+
+
+   # Define the menu for toppings
+   size_option = {"s": "small", "m": "medium", "l": "large", "small": "small", "medium": "medium", "large": "large"}
+   size_prices = {"small": 5, "medium": 7, "large": 9}
+   toppings_menu = {
+       1: {"name": "Lettuce", "cost": 0.0},
+       2: {"name": "Tomato", "cost": 0.0},
+       3: {"name": "Pickles", "cost": 0.0},
+       4: {"name": "Onion", "cost": 0.0},
+       5: {"name": "American Cheese", "cost": 1.00},
+       6: {"name": "Cheddar Cheese", "cost": 1.00},
+       7: {"name": "Swiss Cheese", "cost": 1.50},
+       8: {"name": "BBQ Sauce", "cost": 0.50},
+       9: {"name": "Ketchup", "cost": 0.50},
+       10: {"name": "Mustard", "cost": 0.50},
+       11: {"name": "Mayo", "cost": 0.50},
+       12: {"name": "Grilled Onion", "cost": 1.00},
+       13: {"name": "Premium Bacon", "cost": 2.50},
+       14: {"name": "Fried Egg", "cost": 1.50},
+       15: {"name": "Avocado", "cost": 2.00},
+       16: {"name": "Blue Cheese", "cost": 2.00},
+       17: {"name": "Grilled Mushrooms", "cost": 1.50},
+   }
+
+
+   burger_details, total_cost = order_multiple_burgers(size_option, size_prices, toppings_menu)
+   for details in burger_details:
+       print(details)
+
+
+   print(f"\nOrder Summary:\nTotal cost: ${total_cost:.2f}")
+   payment_method = cash_credit("Pay with cash or credit? (c/cr or cash/credit): ")
+   print(f"\nYou have chosen to pay by {payment_method}. Thank you for your order!")
+
+
+   if want_order in ["d", "delivery"]:
+       print("\nYour delivery will arrive at {}'s address in 30-40 minutes.\n".format(user_name))
+   else:
+       print("Pick up your order at the address mentioned.")
+
+
+
+
+# Run the main program
+order_burger()
