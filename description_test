@@ -1,0 +1,311 @@
+import pandas as pd
+import time
+
+def int_checker(question, low, high):
+    while True:
+        error = f"Enter a number between {low} and {high}, or type 'i' followed by a number for more info."
+        to_check = input(question).lower()
+
+        if to_check.startswith("i") and to_check[1:].isdigit():  # Info request
+            burger_num = int(to_check[1:])
+            if low <= burger_num <= high:
+                return f"info_{burger_num}"
+            else:
+                print(f"Please enter a valid burger number between {low} and {high}.")
+        elif to_check.isdigit():
+            user_response = int(to_check)
+            if low <= user_response <= high:
+                return user_response
+            else:
+                print(error)
+        else:
+            print(error)
+
+def string_checker(question, valid_ans):
+    shortcuts = {k[0]: k for k in valid_ans}
+    while True:
+        user_response = input(question).strip().lower()
+        if user_response in shortcuts:
+            return shortcuts[user_response]
+        elif user_response in valid_ans:
+            return user_response
+        print(f"Enter a valid response from {valid_ans}")  # Error message
+
+def cash_credit(question):
+    valid_responses = {"c": "cash", "cr": "credit"}
+    while True:
+        response = input(question).lower()
+        if response in valid_responses:
+            return valid_responses[response]
+        elif response in ["cash", "credit"]:
+            return response
+        print("Please choose a valid payment method: 'c' or 'cash' for cash, 'cr' or 'credit' for credit.")
+
+def history():
+    print('''
+Welcome to Burger Haven, where we believe that great taste starts with the best ingredients! 
+Our burgers are crafted from 100% Angus beef, ensuring a juicy, flavorful experience that’s all-natural and free from artificial additives. 
+We also support our vegan friends by offering a delicious selection of plant-based options, so everyone can enjoy a satisfying meal. 
+Order with us at Burger Haven, where quality and inclusivity come together for the ultimate burger experience!
+    ''')
+
+def display_menu():
+    menu_data = {
+        "Item": [
+            "1: Classic Beef Burger", "2: Cheeseburger", "3: Bacon Burger", "4: BBQ Burger",
+            "5: Veggie Burger", "6: Chicken Burger", "7: Fish Burger", "8: Mushroom Burger",
+            "9: Spicy Burger", "10: Deluxe Burger", "11: Hawaiian Burger", "12: Teriyaki Burger",
+            "13: Jalapeno Burger", "14: BBQ Chicken Burger", "15: Veggie Deluxe Burger", "16: Blue Cheese Burger",
+            "17: Southwest Burger", "18: Mediterranean Burger"
+        ],
+        "Cost": [
+            "8.00", "8.50", "9.00", "9.50", "8.50", "9.00", "9.50", "8.50",
+            "9.00", "10.00", "9.50", "10.00", "9.00", "9.50", "9.00", "10.00",
+            "9.50", "10.00"
+        ]
+    }
+    df_menu = pd.DataFrame(menu_data)
+    print("<--------------- Menu --------------->")
+    print(df_menu.to_string(index=False, formatters={'Item': '{:<30}'.format, 'Cost': '${:>5}'.format}))
+    print("\nType 'i' followed by a burger number for more info (e.g., 'i1' for Classic Beef Burger).")
+    print("\n|Small | Medium | Large |")
+    print("  |   $5 |   $7   |  $9   |")
+    print("  |------|--------|-------|")
+
+def get_size_cost(size_option, size_prices):
+    size = string_checker("Choose a size (s/m/l or small/medium/large): ", size_option)
+    return size, size_prices[size]
+
+def get_burger(burger_menu):
+    burgers = []
+    total_burger_cost = 0.0
+
+    while True:
+        burger = int_checker("Choose a burger (1-18) or type 'i' for info: ", 1, 18)
+        if isinstance(burger, str) and burger.startswith("info_"):
+            burger_num = int(burger.split("_")[1])
+            print(f"{burger_menu[burger_num]['name']}: {burger_menu[burger_num]['description']}\n")
+            continue  # Loop back to allow more selections or info requests
+        burgers.append(burger)
+        burger_cost = float(burger_menu[burger]['cost'])
+        total_burger_cost += burger_cost
+        print(f"{burger_menu[burger]['name']} added. Total burger cost: ${total_burger_cost:.2f}")
+
+    return burgers, total_burger_cost
+
+def order_one_burger(burger_number, size_option, size_prices, burger_menu):
+    display_menu()
+    print(f"\nOrdering burger {burger_number}...")
+    size, size_cost = get_size_cost(size_option, size_prices)
+    burgers, burger_cost = get_burger(burger_menu)
+    total_cost = size_cost + burger_cost
+    return size, size_cost, burgers, total_cost
+
+def order_multiple_burgers(size_option, size_prices, burger_menu):
+    total_cost = 0
+    burger_details = []
+    burger_number = 1
+
+    while True:
+        size, size_cost, burgers, burger_total_cost = order_one_burger(burger_number, size_option, size_prices, burger_menu)
+
+        burger_summary = f"Burger {burger_number} - Size: {size.capitalize()} (${size_cost})"
+        if burgers:
+            burger_summary += "\n  Burgers:"
+            for burger in burgers:
+                burger_summary += f"\n  - {burger_menu[burger]['name']}: ${burger_menu[burger]['cost']}"
+
+        burger_summary += f"\n  Total for this burger: ${burger_total_cost:.2f}"
+        print(burger_summary)
+        burger_details.append(burger_summary)
+        total_cost += burger_total_cost
+
+        order_more = string_checker("Order another burger? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+        if order_more in ["n", "no"]:
+            break
+
+        burger_number += 1
+
+    return burger_details, total_cost
+
+def not_blank(question):
+    error = "Enter a name."
+    while True:
+        user_name = input(question)
+        if user_name.strip() != '':
+            return user_name
+        else:
+            print(error)
+
+def phone_number(question):
+    while True:
+        number = input(question).strip()
+        if number.isdigit() and len(number) >= 5:
+            return number
+        else:
+            print("Phone number must be at least 5 digits long and contain only numbers.")
+
+def address(question):
+    while True:
+        user_address = input(question).strip()
+        if user_address:
+            return user_address
+        else:
+            print("Address cannot be blank.")
+
+def order_burger():
+    print("<--- Welcome to Burger Haven --->")
+
+    want_history = string_checker("\nLearn about the history of Burger Haven? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+    if want_history in ["y", "yes"]:
+        history()
+
+    want_order = string_checker("Order delivery or pick up? (d/p or delivery/pick up): ", ["d", "p", "delivery", "pick up"])
+    if want_order in ["d", "delivery"]:
+        print("\n$5 surcharge for delivery.")
+        user_name = not_blank("Enter your name: ")
+        phone = phone_number("Enter your phone number: ")
+        user_address = address("Enter your address: ")
+    else:
+        print("Our address is:\n123 Burger Lane, Burger City 45678.")
+        user_name = not_blank("Enter your name: ")
+        phone = phone_number("Enter your phone number: ")
+
+    want_instructions = string_checker("Read the instructions? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+    if want_instructions in ["y", "yes"]:
+        print("\nYou will see a menu with options for burgers. Select burgers by entering the corresponding number. Type 'i' followed by a number for more info, or 'd' when finished.\n")
+
+    size_option = ["s","small", "m", "medium", "l", "large"]
+    size_prices = {"small": 5, "medium": 7, "large": 9}
+    burger_menu = {
+        1: {"name": "Classic Beef Burger", "cost": 8.00, "description": "A delicious beef patty with lettuce, tomato, and our special sauce."},
+        2: {"name": "Cheeseburger", "cost": 8.50, "description": "A classic cheeseburger with melted cheddar and all the fixings."},
+        3: {"name": "Bacon Burger", "cost": 9.00, "description": "Crispy bacon and juicy beef patty with tangy BBQ sauce."},
+        4: {"name": "BBQ Burger", "cost": 9.50, "description": "Grilled to perfection with smoky BBQ sauce and onions."},
+        5: {"name": "Veggie Burger", "cost": 8.50, "description": "A plant-based burger with all the delicious toppings."},
+        6: {"name": "Chicken Burger", "cost": 9.00, "description": "Tender chicken breast with lettuce, tomato, and mayo."},
+        7: {"name": "Fish Burger", "cost": 9.50, "description": "Crispy fish fillet with tartar sauce and lettuce."},
+        8: {"name": "Mushroom Burger", "cost": 8.50, "description": "Grilled mushrooms with Swiss cheese and truffle mayo."},
+        9: {"name": "Spicy Burger", "cost": 9.00, "description": "A spicy beef patty with jalapenos, pepper jack cheese, and hot sauce."},
+        10: {"name": "Deluxe Burger", "cost": 10.00, "description": "Our premium beef patty with bacon, cheese, and all the toppings."},
+        11: {"name": "Hawaiian Burger", "cost": 9.50, "description": "Grilled pineapple, ham, and a beef patty with teriyaki sauce."},
+        12: {"name": "Teriyaki Burger", "cost": 10.00, "description": "A sweet and savory burger with teriyaki-glazed beef."},
+        13: {"name": "Jalapeno Burger", "cost": 9.00, "description": "A zesty burger with jalapenos, pepper jack cheese, and hot sauce."},
+        14: {"name": "BBQ Chicken Burger", "cost": 9.50, "description": "Grilled chicken breast with smoky BBQ sauce."},
+        15: {"name": "Veggie Deluxe Burger", "cost": 9.00, "description": "A deluxe plant-based burger with extra toppings and flavor."},
+        16: {"name": "Blue Cheese Burger", "cost": 10.00, "description": "A beef patty topped with rich blue cheese and caramelized onions."},
+        17: {"name": "Southwest Burger", "cost": 9.50, "description": "A bold burger with spicy southwest sauce and crispy onions."},
+        18: {"name": "Mediterranean Burger", "cost": 10.00, "description": "A Mediterranean-inspired burger with feta cheese and tzatziki sauce."}
+    }
+
+    display_menu()
+    burger_details, total_cost = order_multiple_burgers(size_option, size_prices, burger_menu)
+
+    print("\n--- Order Summary ---")
+    for detail in burger_details:
+        print(detail)
+    print(f"\nTotal cost: ${total_cost:.2f}")
+
+    payment_method = cash_credit("Cash or credit? (c/cr): ")
+    print(f"\nPayment method: {payment_method}")
+
+    print("\nOrder Summary:")
+    print(f"Name: {user_name}")
+    print(f"Phone Number: {phone}")
+    print(f"Address: {user_address}")
+    print(f"Total Cost: ${total_cost:.2f}")
+    print("Payment Method:", payment_method.capitalize())
+
+    for detail in burger_details:
+        print(detail)
+
+    confirm_order = string_checker("Confirm order? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+    if confirm_order in ["n", "no"]:
+        print("Thank your order has been canceled!")
+        total_cost = 0
+        burger_details.clear()
+        burger_number = 0
+        total_burger_cost = 0.0
+
+    else:
+        print("\nYour order has been confirmed! Please allow 10-25 minutes for your fresh burgers to be ready! 🍕🎈\n"
+              "(you will recive a text message when your order is ready)\n")
+        print("Thank you for choosing us, Have a great day!")
+
+    re_order = string_checker("Would you like to place another order? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+    if re_order in ["n", "no"]:
+        print("Thank you for using our services")
+
+        def review_section():
+            print("\n--------- Review of Burger Haven ---------\n")
+
+            # Ask for rating
+            print("Please rate your overall experience at Burger Haven (1-5 stars)")
+            rating = input("Enter your rating: ")
+
+            # Validate rating
+            while not rating.isdigit() or int(rating) < 1 or int(rating) > 5:
+                print("Invalid rating. Please enter a number between 1 and 5 stars.")
+                rating = input("Enter your rating: ")
+
+            # Convert rating to integer
+            rating = int(rating)
+
+            # Ask for comments
+            print("\nWould you like to leave any comments about your experience?")
+            comments = input("Enter your comments (or press Enter to skip): ")
+
+            # Display review summary
+            print("\nThank you for your review!")
+            print(f"You rated Burger Haven {rating}/5 stars. 🍔🎉")
+
+            if comments:
+                print(f"Comments: {comments}")
+            else:
+                print("No comments left.")
+
+        print("\nplease wait system processing...")
+
+        # Time wait
+        time.sleep(1)
+
+        # Loading bar simulation
+        time.sleep(1)
+        loading_steps = [
+            "         🟧🟧🟧🟧🟧🟧🟧",
+            "       🟧🟧🟧🟧🟧🟧🟧🟧🟧",
+            "     🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧",
+            "       🟥🟥🟥🟥🟥🟥🟥🟥🟥",
+            "     🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨",
+            "     🟫🟫🟨🟨🟨🟫🟫🟫🟫🟫🟫",
+            "   🟩🟩🟩🟩🟨🟩🟩🟩🟩🟩🟩🟩🟩",
+            "    🟧🟧🟩🟩🟧🟧🟧🟩🟩🟧🟧",
+            "      🟧🟧🟧🟧🟧🟧🟧🟧🟧"
+
+        ]
+        for step in loading_steps:
+            print(step)
+            time.sleep(1)
+
+        # Example of how to call the review section
+        if __name__ == "__main__":
+            review_section()
+
+        exit()
+
+    else:
+        main()
+
+
+def main():
+    history()  # Show the history at the start
+    while order_burger():
+        print("\nStarting a new order...")
+
+
+if __name__ == "__main__":
+    main()
+
+    print("Goodbye!")
+
+order_burger()
