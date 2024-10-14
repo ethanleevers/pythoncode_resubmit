@@ -1,0 +1,17 @@
+
+confirm_order = string_checker("Confirm order? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+if confirm_order in ["n", "no"]:
+        print("Thank your order has been canceled!")
+        total_cost = 0
+        burger_details.clear()
+        burger_number = 0
+        total_burger_cost = 0.0
+
+    else:
+        print("\nYour order has been confirmed! Please allow 10-25 minutes for your fresh burgers to be ready! 🍕🎈\n"
+             "(you will recive a text message when your order is ready)\n")
+        print("Thank you for choosing us, Have a great day!")
+
+    re_order = string_checker("Would you like to place another order? (y/n or yes/no): ", ["y", "n", "yes", "no"])
+if re_order in ["n", "no"]:
+        print("Thank you for using our services")
